@@ -43,28 +43,35 @@
   </BitmapFonts>
   <UserConfigurations>
     <ColorConfiguration id="themeColor" displayName="color_label" defaultValue="0">
-      <ColorOption id="0" displayName="color_mint" colors="#FF9CF0B4" />
-      <ColorOption id="1" displayName="color_sky" colors="#FF9BD3FF" />
-      <ColorOption id="2" displayName="color_amber" colors="#FFFFD27A" />
-      <ColorOption id="3" displayName="color_rose" colors="#FFFFB0C4" />
-      <ColorOption id="4" displayName="color_lavender" colors="#FFCDB9FF" />
-      <ColorOption id="5" displayName="color_white" colors="#FFFFFFFF" />
+      <ColorOption id="0" displayName="color_classic" colors="#FFFFF6E2 #FF8AB4F8" />
+      <ColorOption id="1" displayName="color_mint" colors="#FF9CF0B4 #FF9CF0B4" />
+      <ColorOption id="2" displayName="color_sky" colors="#FF9BD3FF #FF9BD3FF" />
+      <ColorOption id="3" displayName="color_amber" colors="#FFFFD27A #FFFFD27A" />
+      <ColorOption id="4" displayName="color_rose" colors="#FFFFB0C4 #FFFFB0C4" />
+      <ColorOption id="5" displayName="color_lavender" colors="#FFCDB9FF #FFCDB9FF" />
     </ColorConfiguration>
   </UserConfigurations>
   <Scene backgroundColor="#FF000000">
     <Group name="date_line" x="0" y="0" width="450" height="450">
-          <PartText x="40" y="66" width="370" height="52" name="date">
+          <PartText x="40" y="42" width="370" height="40" name="date">
             <Variant mode="AMBIENT" target="alpha" value="200" />
-            <Text align="CENTER" ellipsis="TRUE">
-              <Font family="SYNC_TO_DEVICE" size="30" weight="MEDIUM" color="#FFFFFFFF">
-                <Template><![CDATA[%s %s %d]]><Parameter expression="[DAY_OF_WEEK_S]" /><Parameter expression="[MONTH_S]" /><Parameter expression="[DAY]" /></Template>
+            <Text align="CENTER" verticalAlign="CENTER" ellipsis="TRUE">
+              <Font family="face_text" size="33.5" color="#FFFCF7EB">
+                <Upper><Template><![CDATA[%s  %s %d]]><Parameter expression="[DAY_OF_WEEK_S]" /><Parameter expression="[MONTH_S]" /><Parameter expression="[DAY]" /></Template></Upper>
               </Font>
             </Text>
           </PartText>
     </Group>
-    <DigitalClock x="0" y="138" width="450" height="170">
-      <TimeText format="h:mm" hourFormat="SYNC_TO_DEVICE" align="CENTER" x="0" y="0" width="450" height="170">
-        <Font family="SYNC_TO_DEVICE" size="140" weight="MEDIUM" color="[CONFIGURATION.themeColor]" />
+    <DigitalClock x="0" y="107" width="450" height="140">
+      <TimeText format="h:mm" hourFormat="SYNC_TO_DEVICE" align="CENTER" verticalAlign="CENTER" x="0" y="0" width="450" height="140" alpha="255">
+        <Variant mode="AMBIENT" target="alpha" value="0" />
+        <Font family="face_time" size="133" color="[CONFIGURATION.themeColor.0]" />
+      </TimeText>
+    </DigitalClock>
+    <DigitalClock x="0" y="107" width="450" height="140">
+      <TimeText format="h:mm" hourFormat="SYNC_TO_DEVICE" align="CENTER" verticalAlign="CENTER" x="0" y="0" width="450" height="140" alpha="0">
+        <Variant mode="AMBIENT" target="alpha" value="255" />
+        <Font family="face_time_ambient" size="133" color="[CONFIGURATION.themeColor.0]" />
       </TimeText>
     </DigitalClock>
     <Group name="weather_line" x="0" y="0" width="450" height="450">
@@ -74,11 +81,11 @@
         </Expressions>
         <Compare expression="has_weather">
           <Group name="weather" x="0" y="0" width="450" height="450">
-          <PartText x="213" y="322" width="197" height="64" name="temperature">
+          <PartText x="229" y="298" width="181" height="40" name="temperature">
             <Variant mode="AMBIENT" target="alpha" value="200" />
-            <Text align="START" ellipsis="TRUE">
-              <Font family="SYNC_TO_DEVICE" size="38" weight="MEDIUM" color="#FFFFFFFF">
-                <Template><![CDATA[%d°%s]]><Parameter expression="[WEATHER.TEMPERATURE]" /><Parameter expression="[WEATHER.TEMPERATURE_UNIT] == 2 ? &quot;F&quot; : &quot;C&quot;" /></Template>
+            <Text align="START" verticalAlign="CENTER" ellipsis="TRUE">
+              <Font family="face_text" size="29.5" color="#FFFCF7EB">
+                <Template><![CDATA[%d°]]><Parameter expression="[WEATHER.TEMPERATURE]" /></Template>
               </Font>
             </Text>
           </PartText>
@@ -87,18 +94,18 @@
                 <Expression name="daytime">[WEATHER.IS_DAY]</Expression>
               </Expressions>
               <Compare expression="daytime">
-              <PartText x="157" y="331" width="46" height="46" tintColor="[CONFIGURATION.themeColor]">
+              <PartText x="176" y="296" width="43" height="43" tintColor="[CONFIGURATION.themeColor.1]">
                 <Text>
-                  <BitmapFont family="wx_day" size="46">
+                  <BitmapFont family="wx_day" size="43">
                     <Template><![CDATA[%s]]><Parameter expression="[WEATHER.CONDITION] &lt;= 15 ? [WEATHER.CONDITION] : 0" /></Template>
                   </BitmapFont>
                 </Text>
               </PartText>
               </Compare>
               <Default>
-              <PartText x="157" y="331" width="46" height="46" tintColor="[CONFIGURATION.themeColor]">
+              <PartText x="176" y="296" width="43" height="43" tintColor="[CONFIGURATION.themeColor.1]">
                 <Text>
-                  <BitmapFont family="wx_night" size="46">
+                  <BitmapFont family="wx_night" size="43">
                     <Template><![CDATA[%s]]><Parameter expression="[WEATHER.CONDITION] &lt;= 15 ? [WEATHER.CONDITION] : 0" /></Template>
                   </BitmapFont>
                 </Text>
@@ -108,10 +115,10 @@
           </Group>
         </Compare>
         <Default>
-          <PartText x="40" y="322" width="370" height="64" name="no_weather">
+          <PartText x="40" y="298" width="370" height="40" name="no_weather">
             <Variant mode="AMBIENT" target="alpha" value="200" />
-            <Text align="CENTER" ellipsis="TRUE">
-              <Font family="SYNC_TO_DEVICE" size="28" weight="MEDIUM" color="#FFFFFFFF">
+            <Text align="CENTER" verticalAlign="CENTER" ellipsis="TRUE">
+              <Font family="face_text" size="24" color="#FFFCF7EB">
                 <Template><![CDATA[%s]]><Parameter expression="&quot;Weather unavailable&quot;" /></Template>
               </Font>
             </Text>

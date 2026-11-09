@@ -2,10 +2,10 @@
 <resources>
   <string name="watch_face_name">Utility Classic</string>
   <string name="color_label">Color</string>
+  <string name="color_classic">Classic</string>
   <string name="color_mint">Mint</string>
   <string name="color_sky">Sky</string>
   <string name="color_amber">Amber</string>
   <string name="color_rose">Rose</string>
   <string name="color_lavender">Lavender</string>
-  <string name="color_white">White</string>
 </resources>

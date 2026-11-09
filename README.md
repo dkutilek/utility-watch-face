@@ -1,10 +1,11 @@
 # Utility Classic
 
-A personal Pixel Watch 5 face styled after Google's Utility face: the date at the top, large digital
-time in the middle, and the current weather icon and temperature below.
+A personal Pixel Watch 5 face modeled on the Utility face from the Pixel Watch 3: the date at the
+top, large digital time in the middle, and the current weather icon and temperature below. Its
+layout, sizes and colors were matched against screenshots of Utility on a Pixel Watch 3.
 
 <p align="center">
-  <img src="screenshots/colors/mint.png" alt="Watch face in mint showing the date, large time, and a weather icon with 58°F" width="320">
+  <img src="screenshots/colors/classic.png" alt="Watch face in the Classic colors showing the date, large time, and a weather icon with 58°" width="320">
 </p>
 
 Built with Watch Face Format 2 (the lowest version with weather data), so it contains no app code.
@@ -13,22 +14,24 @@ Built with Watch Face Format 2 (the lowest version with weather data), so it con
 
 ### Colors
 
-The color setting changes the time and the weather icon. The date and temperature stay white.
+The color setting changes the time and the weather icon. The date and temperature stay cream.
 
-| Mint (default) | Sky | Amber |
+| Classic (default) | Mint | Sky |
 |:---:|:---:|:---:|
-| <img src="screenshots/colors/mint.png" alt="Mint color option" width="200"> | <img src="screenshots/colors/sky.png" alt="Sky color option" width="200"> | <img src="screenshots/colors/amber.png" alt="Amber color option" width="200"> |
+| <img src="screenshots/colors/classic.png" alt="Classic color option, cream time and blue weather icon" width="200"> | <img src="screenshots/colors/mint.png" alt="Mint color option" width="200"> | <img src="screenshots/colors/sky.png" alt="Sky color option" width="200"> |
 
-| Rose | Lavender | White |
+| Amber | Rose | Lavender |
 |:---:|:---:|:---:|
-| <img src="screenshots/colors/rose.png" alt="Rose color option" width="200"> | <img src="screenshots/colors/lavender.png" alt="Lavender color option" width="200"> | <img src="screenshots/colors/white.png" alt="White color option" width="200"> |
+| <img src="screenshots/colors/amber.png" alt="Amber color option" width="200"> | <img src="screenshots/colors/rose.png" alt="Rose color option" width="200"> | <img src="screenshots/colors/lavender.png" alt="Lavender color option" width="200"> |
 
 ### Always-on display
 
-<img src="screenshots/always-on.png" alt="Dimmed always-on view of the watch face" width="200">
+Like Utility, the always-on display dims the face and draws the time in a lighter weight.
+
+<img src="screenshots/always-on.png" alt="Dimmed always-on view with a lighter-weight time" width="200">
 
 These were rendered on a Wear OS 7 emulator using test builds with the color and weather fixed, so
-the 58°F reading is sample data.
+the 58° reading is sample data.
 
 ## Install on the watch
 
@@ -58,6 +61,14 @@ Long-press the face and tap **Edit** to change the color.
 For layout changes, edit `tools/generate.py`, not `res/raw/watchface.xml`, then run `./build.sh`.
 Rebuilding needs a Python with Pillow, set through `PYTHON=/path/to/python`. Updates must be signed
 with the same key, kept at `~/.android/utility-classic.keystore`.
+
+## Fonts
+
+The face uses [Google Sans Flex](https://github.com/google/fonts/tree/main/ofl/googlesansflex),
+licensed under the SIL Open Font License 1.1 (see `fonts/OFL.txt`). `res/font/` holds three cut-down
+copies: the time, a lighter time for the always-on display, and the date and temperature. The time
+copies have a smaller colon centered on the digits, like Utility's clock font. To change a weight,
+edit `tools/make_fonts.py` and run it on the downloaded font (it needs fontTools).
 
 ## Weather
 

@@ -18,21 +18,26 @@ ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / "res"
 
 # --- Layout, in the 450x450 coordinate space the format scales to either watch size.
+# Positions and sizes are matched to a Pixel Watch 3 screenshot of the Utility face.
 SIZE = 450
-DATE_Y, DATE_H, DATE_SIZE = 66, 52, 30
-TIME_Y, TIME_H, TIME_SIZE = 138, 170, 140
-WEATHER_Y, WEATHER_H = 322, 64
-ICON_X, ICON_SIZE = 157, 46
-TEMP_X, TEMP_SIZE = 213, 38
+TEXT_COLOR = "#FFFCF7EB"
+DATE_Y, DATE_H, DATE_SIZE = 42, 40, 33.5
+TIME_Y, TIME_H, TIME_SIZE = 107, 140, 133
+WEATHER_Y, WEATHER_H = 298, 40
+ICON_X, ICON_SIZE = 176, 43
+TEMP_X, TEMP_SIZE = 229, 29.5
 
+# Each option is "<time color> <weather icon color>".
 THEMES = [
-    ("mint", "Mint", "#FF9CF0B4"),
-    ("sky", "Sky", "#FF9BD3FF"),
-    ("amber", "Amber", "#FFFFD27A"),
-    ("rose", "Rose", "#FFFFB0C4"),
-    ("lavender", "Lavender", "#FFCDB9FF"),
-    ("white", "White", "#FFFFFFFF"),
+    ("classic", "Classic", "#FFFFF6E2 #FF8AB4F8"),
+    ("mint", "Mint", "#FF9CF0B4 #FF9CF0B4"),
+    ("sky", "Sky", "#FF9BD3FF #FF9BD3FF"),
+    ("amber", "Amber", "#FFFFD27A #FFFFD27A"),
+    ("rose", "Rose", "#FFFFB0C4 #FFFFB0C4"),
+    ("lavender", "Lavender", "#FFCDB9FF #FFCDB9FF"),
 ]
+TIME_COLOR = "[CONFIGURATION.themeColor.0]"
+ICON_COLOR = "[CONFIGURATION.themeColor.1]"
 
 # WEATHER.CONDITION value -> icon, in enum order 0..15. Index 14 and 1 differ by day/night.
 CONDITION_ICONS = [
@@ -55,20 +60,23 @@ def bitmap_font(name, night):
     return "\n".join(lines)
 
 
-def text_part(x, y, width, height, size, align, template, params, color, name):
+def text_part(x, y, width, height, size, align, template, params, name, upper=False):
     parameters = "".join(f'<Parameter expression="{p}" />' for p in params)
+    template = f"<Template><![CDATA[{template}]]>{parameters}</Template>"
+    if upper:
+        template = f"<Upper>{template}</Upper>"
     return f"""<PartText x="{x}" y="{y}" width="{width}" height="{height}" name="{name}">
             <Variant mode="AMBIENT" target="alpha" value="200" />
-            <Text align="{align}" ellipsis="TRUE">
-              <Font family="SYNC_TO_DEVICE" size="{size}" weight="MEDIUM" color="{color}">
-                <Template><![CDATA[{template}]]>{parameters}</Template>
+            <Text align="{align}" verticalAlign="CENTER" ellipsis="TRUE">
+              <Font family="face_text" size="{size}" color="{TEXT_COLOR}">
+                {template}
               </Font>
             </Text>
           </PartText>"""
 
 
 def weather_icon(family):
-    return f"""<PartText x="{ICON_X}" y="{WEATHER_Y + (WEATHER_H - ICON_SIZE) // 2}" width="{ICON_SIZE}" height="{ICON_SIZE}" tintColor="[CONFIGURATION.themeColor]">
+    return f"""<PartText x="{ICON_X}" y="{WEATHER_Y + (WEATHER_H - ICON_SIZE) // 2}" width="{ICON_SIZE}" height="{ICON_SIZE}" tintColor="{ICON_COLOR}">
                 <Text>
                   <BitmapFont family="{family}" size="{ICON_SIZE}">
                     <Template><![CDATA[%s]]><Parameter expression="[WEATHER.CONDITION] &lt;= 15 ? [WEATHER.CONDITION] : 0" /></Template>
@@ -77,18 +85,27 @@ def weather_icon(family):
               </PartText>"""
 
 
+def time_text(family, alpha, ambient_alpha):
+    """The time in one font. Two of these cross-fade so the always-on display draws lighter."""
+    return f"""    <DigitalClock x="0" y="{TIME_Y}" width="{SIZE}" height="{TIME_H}">
+      <TimeText format="h:mm" hourFormat="SYNC_TO_DEVICE" align="CENTER" verticalAlign="CENTER" x="0" y="0" width="{SIZE}" height="{TIME_H}" alpha="{alpha}">
+        <Variant mode="AMBIENT" target="alpha" value="{ambient_alpha}" />
+        <Font family="{family}" size="{TIME_SIZE}" color="{TIME_COLOR}" />
+      </TimeText>
+    </DigitalClock>"""
+
+
 def build_face():
     options = "\n".join(
-        f'      <ColorOption id="{i}" displayName="color_{tid}" colors="{color}" />'
-        for i, (tid, _, color) in enumerate(THEMES)
+        f'      <ColorOption id="{i}" displayName="color_{tid}" colors="{colors}" />'
+        for i, (tid, _, colors) in enumerate(THEMES)
     )
-    unit = "[WEATHER.TEMPERATURE_UNIT] == 2 ? &quot;F&quot; : &quot;C&quot;"
-    date = text_part(40, DATE_Y, SIZE - 80, DATE_H, DATE_SIZE, "CENTER", "%s %s %d",
-                     ["[DAY_OF_WEEK_S]", "[MONTH_S]", "[DAY]"], "#FFFFFFFF", "date")
-    temp = text_part(TEMP_X, WEATHER_Y, SIZE - TEMP_X - 40, WEATHER_H, TEMP_SIZE, "START", "%d°%s",
-                     ["[WEATHER.TEMPERATURE]", unit], "#FFFFFFFF", "temperature")
-    unavailable = text_part(40, WEATHER_Y, SIZE - 80, WEATHER_H, 28, "CENTER", "%s",
-                            ["&quot;Weather unavailable&quot;"], "#FFFFFFFF", "no_weather")
+    date = text_part(40, DATE_Y, SIZE - 80, DATE_H, DATE_SIZE, "CENTER", "%s  %s %d",
+                     ["[DAY_OF_WEEK_S]", "[MONTH_S]", "[DAY]"], "date", upper=True)
+    temp = text_part(TEMP_X, WEATHER_Y, SIZE - TEMP_X - 40, WEATHER_H, TEMP_SIZE, "START", "%d°",
+                     ["[WEATHER.TEMPERATURE]"], "temperature")
+    unavailable = text_part(40, WEATHER_Y, SIZE - 80, WEATHER_H, 24, "CENTER", "%s",
+                            ["&quot;Weather unavailable&quot;"], "no_weather")
     return f"""<?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated by tools/generate.py. Edit that file, not this one. -->
 <WatchFace width="{SIZE}" height="{SIZE}" clipShape="CIRCLE">
@@ -107,11 +124,8 @@ def build_face():
     <Group name="date_line" x="0" y="0" width="{SIZE}" height="{SIZE}">
           {date}
     </Group>
-    <DigitalClock x="0" y="{TIME_Y}" width="{SIZE}" height="{TIME_H}">
-      <TimeText format="h:mm" hourFormat="SYNC_TO_DEVICE" align="CENTER" x="0" y="0" width="{SIZE}" height="{TIME_H}">
-        <Font family="SYNC_TO_DEVICE" size="{TIME_SIZE}" weight="MEDIUM" color="[CONFIGURATION.themeColor]" />
-      </TimeText>
-    </DigitalClock>
+{time_text("face_time", alpha=255, ambient_alpha=0)}
+{time_text("face_time_ambient", alpha=0, ambient_alpha=255)}
     <Group name="weather_line" x="0" y="0" width="{SIZE}" height="{SIZE}">
       <Condition>
         <Expressions>
@@ -305,19 +319,19 @@ def render_icon(draw_fn):
 
 def build_preview(out):
     """A static thumbnail for the picker, drawn to match the live layout."""
-    mint = (0x9C, 0xF0, 0xB4, 255)
-    white = (255, 255, 255, 255)
+    time_color, icon_color = (tuple(int(c[i:i + 2], 16) for i in (3, 5, 7)) for c in THEMES[0][2].split())
+    text_color = tuple(int(TEXT_COLOR[i:i + 2], 16) for i in (3, 5, 7))
     img = Image.new("RGBA", (SIZE * 2, SIZE * 2), (0, 0, 0, 255))
     d = ImageDraw.Draw(img)
-    font = "/System/Library/Fonts/HelveticaNeue.ttc"
+    fonts = RES / "font"
     centre = lambda y, h: (y + h / 2) * 2
-    d.text((SIZE, centre(DATE_Y, DATE_H)), "Sat Nov 7",
-           font=ImageFont.truetype(font, DATE_SIZE * 2, index=10), fill=white, anchor="mm")
+    d.text((SIZE, centre(DATE_Y, DATE_H)), "SAT NOV 7",
+           font=ImageFont.truetype(fonts / "face_text.ttf", DATE_SIZE * 2), fill=text_color, anchor="mm")
     d.text((SIZE, centre(TIME_Y, TIME_H)), "10:08",
-           font=ImageFont.truetype(font, TIME_SIZE * 2, index=10), fill=mint, anchor="mm")
-    d.text((TEMP_X * 2, centre(WEATHER_Y, WEATHER_H)), "58°F",
-           font=ImageFont.truetype(font, TEMP_SIZE * 2, index=10), fill=white, anchor="lm")
-    tinted = Image.new("RGBA", (ICON_SIZE * 2, ICON_SIZE * 2), mint)
+           font=ImageFont.truetype(fonts / "face_time.ttf", TIME_SIZE * 2), fill=time_color, anchor="mm")
+    d.text((TEMP_X * 2, centre(WEATHER_Y, WEATHER_H)), "58°",
+           font=ImageFont.truetype(fonts / "face_text.ttf", TEMP_SIZE * 2), fill=text_color, anchor="lm")
+    tinted = Image.new("RGBA", (ICON_SIZE * 2, ICON_SIZE * 2), icon_color)
     tinted.putalpha(render_icon(icon_partly_day).getchannel("A").resize(tinted.size, Image.LANCZOS))
     img.alpha_composite(tinted, (ICON_X * 2, (WEATHER_Y + (WEATHER_H - ICON_SIZE) // 2) * 2))
     img.convert("RGB").resize((SIZE, SIZE), Image.LANCZOS).save(out)
